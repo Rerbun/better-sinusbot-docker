@@ -1,7 +1,10 @@
-FROM debian:buster-slim
+FROM debian:bookworm
 
 LABEL description="SinusBot - Discord only image"
 LABEL version="1.0.2"
+
+# Create sinusbot user
+RUN useradd --user-group --system --create-home --no-log-init sinusbot
 
 # Install dependencies and clean up afterwards
 RUN apt-get update && \
@@ -29,9 +32,13 @@ RUN bash install.sh yt-dlp
 RUN bash install.sh text-to-speech
 
 ADD entrypoint.sh .
+ADD config.ini data/config.ini
+
 RUN chmod 755 entrypoint.sh
 
 EXPOSE 8087
+
+RUN chown -R sinusbot:sinusbot /opt/sinusbot
 
 VOLUME ["/opt/sinusbot/data", "/opt/sinusbot/scripts"]
 
@@ -39,3 +46,7 @@ ENTRYPOINT ["/opt/sinusbot/entrypoint.sh"]
 
 HEALTHCHECK --interval=1m --timeout=10s \
   CMD curl --no-keepalive -f http://localhost:8087/api/v1/botId || exit 1
+
+USER sinusbot
+
+CMD /opt/sinusbot/sinusbot

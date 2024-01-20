@@ -51,14 +51,14 @@ if [[ -v UID ]] || [[ -v GID ]]; then
     echo "User ID: $UID"
     SETPRIV="$SETPRIV --reuid=$UID"
     echo "Change file owner..."
-    chown -R "$UID" "$PWD"
+    chown -R "sinusbot:sinusbot" "$PWD"
   fi
   # set group id
   if [[ -v GID ]]; then
     echo "Group ID: $GID"
     SETPRIV="$SETPRIV --regid=$GID"
     echo "Change file group..."
-    chown -R ":$GID" "$PWD"
+    chown -R "sinusbot:sinusbot" "$PWD"
   fi
   echo "Drop privileges..."
   SINUSBOT="$SETPRIV $SINUSBOT"
@@ -67,18 +67,3 @@ fi
 
 echo "Clearing yt-dlp cache..."
 $YTDL --rm-cache-dir
-
-echo "Starting SinusBot..."
-if [[ -v OVERRIDE_PASSWORD ]]; then
-  echo "Overriding password..."
-  $SINUSBOT --override-password="${OVERRIDE_PASSWORD}" &
-else
-  $SINUSBOT &
-fi
-
-PID=$!
-echo "PID: $PID"
-
-while true; do
-  tail -f /dev/null & wait ${!}
-done
